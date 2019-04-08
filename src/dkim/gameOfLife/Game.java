@@ -1,4 +1,4 @@
-package dkim;
+package dkim.GameOfLife;
 
 import edu.princeton.cs.introcs.StdDraw;
 
@@ -6,10 +6,11 @@ import java.util.*;
 
 public class Game {
 
-    private final int FIELD_SIZE = 25; // размер игрового поля
+    private final int FIELD_WIDTH = 60; // ширина игрового поля
+    private final int FIELD_HEIGHT = 35; // высота игрового поля
     private final int FRAME_DELAY = 200; // задержка отрисовки
-    private boolean[][] currentGen = new boolean[FIELD_SIZE][FIELD_SIZE];
-    private boolean[][] nextGen = new boolean[FIELD_SIZE][FIELD_SIZE];
+    private boolean[][] currentGen = new boolean[FIELD_WIDTH][FIELD_HEIGHT];
+    private boolean[][] nextGen = new boolean[FIELD_WIDTH][FIELD_HEIGHT];
     private Random random = new Random();
 
     public static void main(String[] args) {
@@ -19,9 +20,9 @@ public class Game {
     void run() {
 
         //настраиваем Canvas
-        StdDraw.setCanvasSize(1200, 700);
-        StdDraw.setXscale(-300, 1199);
-        StdDraw.setYscale(-200, 699);
+        StdDraw.setCanvasSize(1300, 700);
+        StdDraw.setXscale(-20, 1199);
+        StdDraw.setYscale(-20, 699);
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.enableDoubleBuffering(); //буферизация с offscreen для анимации
 
@@ -41,8 +42,8 @@ public class Game {
             life();
             long endLifeCycle = System.currentTimeMillis();
 
-            StdDraw.textLeft(-100, 350, String.valueOf(i));
-            StdDraw.textLeft(-100, 400, endLifeCycle - startLifeCycle + " ms");
+//            System.out.println(i);
+//            System.out.println(endLifeCycle - startLifeCycle + " ms");
 
             show();
             if (StdDraw.isMousePressed()) {
@@ -58,8 +59,8 @@ public class Game {
      */
     void generate() {
         //Случайная генерация
-        for (int i = 0; i < FIELD_SIZE; i++) {
-            for (int j = 0; j < FIELD_SIZE; j++) {
+        for (int i = 0; i < FIELD_WIDTH; i++) {
+            for (int j = 0; j < FIELD_HEIGHT; j++) {
                 currentGen[i][j] = random.nextBoolean();
             }
         }
@@ -108,10 +109,10 @@ public class Game {
             for (int j = -1; j < 2; j++) {
                 int newX = x + i;
                 int newY = y + j;
-                newX = (newX < 0) ? FIELD_SIZE - 1 : newX; //если координата выходит за
-                newY = (newY < 0) ? FIELD_SIZE - 1 : newY; //границы поля, то новая координата
-                newX = (newX > FIELD_SIZE - 1) ? 0 : newX; //появляется с противоположной стороны поля
-                newY = (newY > FIELD_SIZE - 1) ? 0 : newY;
+                newX = (newX < 0) ? FIELD_WIDTH - 1 : newX; //если координата выходит за
+                newY = (newY < 0) ? FIELD_HEIGHT - 1 : newY; //границы поля, то новая координата
+                newX = (newX > FIELD_WIDTH- 1) ? 0 : newX; //появляется с противоположной стороны поля
+                newY = (newY > FIELD_HEIGHT - 1) ? 0 : newY;
 
                 count += currentGen[newX][newY] ? 1 : 0;
             }
@@ -124,11 +125,11 @@ public class Game {
     }
 
     /**
-     * Смена поколения по правилам Conway's dkim.Game of Life
+     * Смена поколения по правилам Conway's dkim.GameOfLife.Game of Life
      */
     void life() {
-        for (int x = 0; x < FIELD_SIZE; x++) {
-            for (int y = 0; y < FIELD_SIZE; y++) {
+        for (int x = 0; x < FIELD_WIDTH; x++) {
+            for (int y = 0; y < FIELD_HEIGHT; y++) {
 
                 int neighbors = countNeighbors(x, y);   //живые соседи текущей клетки
                 nextGen[x][y] = currentGen[x][y];       //копируем клетку из текущего поколения в следующее
@@ -139,7 +140,7 @@ public class Game {
                     nextGen[x][y] = nextGen[x][y];
                 }
 
-                if (neighbors < 2 || neighbors > 3) {   //в противном случае клетка умирает
+                if ((neighbors < 2) || (neighbors > 3)) {   //в противном случае клетка умирает
                     nextGen[x][y] = false;
                 } else {
                     nextGen[x][y] = nextGen[x][y];
@@ -148,8 +149,8 @@ public class Game {
         }
 
         //переносим новое поколение в текущее
-        for (int i = 0; i < FIELD_SIZE; i++) {
-            System.arraycopy(nextGen[i], 0, currentGen[i], 0, FIELD_SIZE);
+        for (int i = 0; i < FIELD_WIDTH; i++) {
+            System.arraycopy(nextGen[i], 0, currentGen[i], 0, FIELD_HEIGHT);
         }
     }
 
@@ -158,8 +159,8 @@ public class Game {
      */
     void show() {
 
-        for (int x = 0; x < FIELD_SIZE; x++) {
-            for (int y = 0; y < FIELD_SIZE; y++) {
+        for (int x = 0; x < FIELD_WIDTH; x++) {
+            for (int y = 0; y < FIELD_HEIGHT; y++) {
                 //отрисовка сетки
                 StdDraw.setPenRadius(0.0001);
                 StdDraw.square(x * 20, y * 20, 10);
