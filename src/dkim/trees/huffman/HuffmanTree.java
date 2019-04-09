@@ -1,6 +1,7 @@
 package dkim.trees.huffman;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HuffmanTree implements Comparable<HuffmanTree> {
 
@@ -87,6 +88,27 @@ public class HuffmanTree implements Comparable<HuffmanTree> {
             encode.append(codeTable.get(text.charAt(i)));
         }
         return encode.toString();
+    }
+
+    /**
+     * Decode some code-text
+     * @param code - text code
+     * @return text
+     */
+    public String decode(String code) {
+        StringBuilder text = new StringBuilder();
+        StringBuilder cache = new StringBuilder();
+        Map<String, Character> inverseCodeTable = codeTable().entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+        for (int i = 0; i < code.length(); i++) {
+            cache.append(code.charAt(i));
+            if (inverseCodeTable.containsKey(cache.toString())) {
+                text.append(inverseCodeTable.get(cache.toString()));
+                cache.delete(0, cache.toString().length());
+            }
+        }
+
+        return text.toString();
     }
 
     /**
