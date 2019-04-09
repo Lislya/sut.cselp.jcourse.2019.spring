@@ -1,4 +1,4 @@
-package dkim.GameOfLife;
+package dkim.gameOfLife;
 
 import edu.princeton.cs.introcs.StdDraw;
 
@@ -111,7 +111,7 @@ public class Game {
                 int newY = y + j;
                 newX = (newX < 0) ? FIELD_WIDTH - 1 : newX; //если координата выходит за
                 newY = (newY < 0) ? FIELD_HEIGHT - 1 : newY; //границы поля, то новая координата
-                newX = (newX > FIELD_WIDTH- 1) ? 0 : newX; //появляется с противоположной стороны поля
+                newX = (newX > FIELD_WIDTH - 1) ? 0 : newX; //появляется с противоположной стороны поля
                 newY = (newY > FIELD_HEIGHT - 1) ? 0 : newY;
 
                 count += currentGen[newX][newY] ? 1 : 0;
@@ -125,7 +125,7 @@ public class Game {
     }
 
     /**
-     * Смена поколения по правилам Conway's dkim.GameOfLife.Game of Life
+     * Смена поколения по правилам Conway's dkim.gameOfLife.Game of Life
      */
     void life() {
         for (int x = 0; x < FIELD_WIDTH; x++) {
@@ -174,5 +174,51 @@ public class Game {
         }
         StdDraw.show();
         StdDraw.clear(); //очистка offscreen
+    }
+
+    /* Класс живых клеток*/
+    class Cell {
+        private int x;
+        private int y;
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public void setY(int y) {
+            this.y = y;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+
+            if (!(obj instanceof Cell)) {
+                return false;
+            }
+
+            Cell cell = (Cell) obj;
+            return (this.x == cell.x) && (this.y == cell.y);
+        }
+
+        @Override
+        public int hashCode() {
+            return y*31 + x;
+        }
+
+        @Override
+        public String toString() {
+            return "[x:" + x + " y:" + y + "]";
+        }
     }
 }
