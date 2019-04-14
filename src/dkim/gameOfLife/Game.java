@@ -6,8 +6,6 @@ import java.util.*;
 
 public class Game {
 
-    //    private final int FIELD_WIDTH = 60; // ширина игрового поля
-//    private final int FIELD_HEIGHT = 35; // высота игрового поля
     private final int FRAME_DELAY = 200; // задержка отрисовки
     private Set<Cell> currentGen = new HashSet<>();
     private Set<Cell> nextGen = new HashSet<>();
@@ -23,31 +21,31 @@ public class Game {
         StdDraw.setCanvasSize(1300, 700);
         StdDraw.setXscale(0, 1299);
         StdDraw.setYscale(0, 699);
+        StdDraw.setPenRadius(0.1);
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.enableDoubleBuffering(); //буферизация с offscreen для анимации
 
         //генерируем игровое поле
         generate();
-//        show();
+        show();
 
-//        int i = 1; //номер поколения
-//        while (true) {
+        int i = 1; //номер поколения
+        while (true) {
 //            try {
 //                Thread.sleep(FRAME_DELAY);
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-//            i++;
-//            long startLifeCycle = System.currentTimeMillis();
-//            life();
-//            long endLifeCycle = System.currentTimeMillis();
-//
-//            show();
-//
-//        }
+            i++;
+            long startLifeCycle = System.currentTimeMillis();
+            life();
+            long endLifeCycle = System.currentTimeMillis();
 
-        life();
-        nextGen.forEach(System.out::println);
+            StdDraw.textLeft(100,300, endLifeCycle - startLifeCycle + " ms");
+            StdDraw.textLeft(100,350, i + " generation");
+            show();
+//
+        }
     }
 
     /**
@@ -75,11 +73,19 @@ public class Game {
         };
 
         Cell[] line = {
-                new Cell(9, 10),
-                new Cell(10, 10),
-                new Cell(11, 10),
+                new Cell(299, 300),
+                new Cell(300, 300),
+                new Cell(301, 300),
         };
-        currentGen.addAll(Arrays.asList(line));
+
+        Cell[] glider = {
+                new Cell(299,300),
+                new Cell(300,300),
+                new Cell(301,300),
+                new Cell(301,301),
+                new Cell(300,302)
+        };
+        currentGen.addAll(Arrays.asList(glider));
 
     }
 
@@ -147,6 +153,9 @@ public class Game {
             }
         }
 
+        currentGen.clear();
+        currentGen.addAll(nextGen);
+        nextGen.clear();
 
     }
 
@@ -154,6 +163,9 @@ public class Game {
      * Отрисовка следующего поколения
      */
     void show() {
+        for (Cell cell : currentGen) {
+            StdDraw.filledCircle(cell.x, cell.y,1);
+        }
 
         StdDraw.show();
         StdDraw.clear(); //очистка offscreen
