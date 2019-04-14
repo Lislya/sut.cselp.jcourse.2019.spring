@@ -6,11 +6,11 @@ import java.util.*;
 
 public class Game {
 
-    private final int FIELD_WIDTH = 60; // ширина игрового поля
-    private final int FIELD_HEIGHT = 35; // высота игрового поля
+//    private final int FIELD_WIDTH = 60; // ширина игрового поля
+//    private final int FIELD_HEIGHT = 35; // высота игрового поля
     private final int FRAME_DELAY = 200; // задержка отрисовки
-    private boolean[][] currentGen = new boolean[FIELD_WIDTH][FIELD_HEIGHT];
-    private boolean[][] nextGen = new boolean[FIELD_WIDTH][FIELD_HEIGHT];
+    private Set<Cell> currentGen = new HashSet<>();
+    private Set<Cell> nextGen = new HashSet<>();
     private Random random = new Random();
 
     public static void main(String[] args) {
@@ -30,26 +30,24 @@ public class Game {
         generate();
         show();
 
-        int i = 1; //номер поколения
-        while (true) {
-            try {
-                Thread.sleep(FRAME_DELAY);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            i++;
-            long startLifeCycle = System.currentTimeMillis();
-            life();
-            long endLifeCycle = System.currentTimeMillis();
+//        int i = 1; //номер поколения
+//        while (true) {
+//            try {
+//                Thread.sleep(FRAME_DELAY);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            i++;
+//            long startLifeCycle = System.currentTimeMillis();
+//            life();
+//            long endLifeCycle = System.currentTimeMillis();
+//
+//            show();
+//
+//        }
 
-//            System.out.println(i);
-//            System.out.println(endLifeCycle - startLifeCycle + " ms");
-
-            show();
-            if (StdDraw.isMousePressed()) {
-                StdDraw.pause(3000);
-            }
-        }
+        life();
+        nextGen.forEach(System.out::println);
     }
 
     /**
@@ -58,100 +56,79 @@ public class Game {
      * Для того, чтобы сгенерировать Small Exploder, раскомменировать блок "Small Exploder"
      */
     void generate() {
-        //Случайная генерация
-        for (int i = 0; i < FIELD_WIDTH; i++) {
-            for (int j = 0; j < FIELD_HEIGHT; j++) {
-                currentGen[i][j] = random.nextBoolean();
-            }
-        }
+        /* Генерируем small exploder */
+        Cell[] smallExploder = {
+                new Cell(13, 13),
+                new Cell(14, 13),
+                new Cell(15, 13),
+                new Cell(14, 14),
+                new Cell(13, 12),
+                new Cell(15, 12),
+                new Cell(14, 11)
+        };
 
-        //Разкомментировать, чтобы сгенерировать конкретное поле
-        /*
-        for (int i = 0; i < FIELD_SIZE; i++) {
-            for (boolean[] row : currentGen) {
-                Arrays.fill(row, false);
-            }
-        }
-        */
+        Cell[] block = {
+                new Cell(10,10),
+                new Cell(10,11),
+                new Cell(11,11),
+                new Cell(11,10),
+        };
 
-        //Glider
-        /*
-        currentGen[3][3] = true;
-        currentGen[4][3] = true;
-        currentGen[5][3] = true;
-        currentGen[5][2] = true;
-        currentGen[4][1] = true;
-        */
+        Cell[] line = {
+                new Cell(10, 10),
+                new Cell(11, 10),
+                new Cell(12, 10),
+        };
+        currentGen.addAll(Arrays.asList(line));
 
-        //Small Exploder
-        /*
-        currentGen[13][13] = true;
-        currentGen[14][13] = true;
-        currentGen[15][13] = true;
-        currentGen[14][14] = true;
-        currentGen[13][12] = true;
-        currentGen[15][12] = true;
-        currentGen[14][11] = true;
-        */
     }
 
     /**
      * Метод для подсчета количества живых соседей клетки
      *
-     * @param x - координата X текущей клетки
-     * @param y - координата Y текущей клетки
+     * @param cell - клетка, для которой считаются соседи
      * @return количество "живых" соседей
      */
-    int countNeighbors(int x, int y) {
+    int countNeighbors(Cell cell) {
         int count = 0;
-        //обходим поле 3*3 (все соседи + сама клетка)
+
+        dead:
+        //обходим поле 3*3 (все соседи)
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
-                int newX = x + i;
-                int newY = y + j;
-                newX = (newX < 0) ? FIELD_WIDTH - 1 : newX; //если координата выходит за
-                newY = (newY < 0) ? FIELD_HEIGHT - 1 : newY; //границы поля, то новая координата
-                newX = (newX > FIELD_WIDTH - 1) ? 0 : newX; //появляется с противоположной стороны поля
-                newY = (newY > FIELD_HEIGHT - 1) ? 0 : newY;
 
-                count += currentGen[newX][newY] ? 1 : 0;
+                if ((i == 0) && (j == 0)) {
+                    continue;
+                }
+
+                int newX = cell.x + i;
+                int newY = cell.y + j;
+                Cell neighbor = new Cell(newX, newY);
+
+                count += currentGen.contains(neighbor) ? 1 : 0;
+
+                if (count > 3) {
+                    break dead;
+                }
             }
         }
-        if (currentGen[x][y]) {
-            /* если текущая клетка живая, то вычитаем 1 из общего числа живых соседей */
-            count--;
-        }
+
         return count;
     }
+
 
     /**
      * Смена поколения по правилам Conway's dkim.gameOfLife.Game of Life
      */
     void life() {
-        for (int x = 0; x < FIELD_WIDTH; x++) {
-            for (int y = 0; y < FIELD_HEIGHT; y++) {
-
-                int neighbors = countNeighbors(x, y);   //живые соседи текущей клетки
-                nextGen[x][y] = currentGen[x][y];       //копируем клетку из текущего поколения в следующее
-
-                if (neighbors == 3) {                   //если количество живых соседей равно 3,
-                    nextGen[x][y] = true;               //то появляется новая клетка || выживает предыдущая
-                } else {
-                    nextGen[x][y] = nextGen[x][y];
-                }
-
-                if ((neighbors < 2) || (neighbors > 3)) {   //в противном случае клетка умирает
-                    nextGen[x][y] = false;
-                } else {
-                    nextGen[x][y] = nextGen[x][y];
-                }
+        Set<Cell> potentialCells = new HashSet<>();
+        for (Cell cell : currentGen) {
+            int aliveNeighbors = countNeighbors(cell);
+            if ((aliveNeighbors <= 3) && (aliveNeighbors >= 2)) {
+                nextGen.add(cell);
             }
         }
 
-        //переносим новое поколение в текущее
-        for (int i = 0; i < FIELD_WIDTH; i++) {
-            System.arraycopy(nextGen[i], 0, currentGen[i], 0, FIELD_HEIGHT);
-        }
     }
 
     /**
@@ -159,19 +136,6 @@ public class Game {
      */
     void show() {
 
-        for (int x = 0; x < FIELD_WIDTH; x++) {
-            for (int y = 0; y < FIELD_HEIGHT; y++) {
-                //отрисовка сетки
-                StdDraw.setPenRadius(0.0001);
-                StdDraw.square(x * 20, y * 20, 10);
-
-                //отрисовка точки
-                if (currentGen[x][y]) {
-                    StdDraw.setPenRadius(0.02);
-                    StdDraw.point(x * 20, y * 20);
-                }
-            }
-        }
         StdDraw.show();
         StdDraw.clear(); //очистка offscreen
     }
@@ -181,19 +145,8 @@ public class Game {
         private int x;
         private int y;
 
-        public int getX() {
-            return x;
-        }
-
-        public void setX(int x) {
+        public Cell(int x, int y) {
             this.x = x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public void setY(int y) {
             this.y = y;
         }
 
@@ -213,7 +166,7 @@ public class Game {
 
         @Override
         public int hashCode() {
-            return y*31 + x;
+            return y * 31 + x;
         }
 
         @Override
