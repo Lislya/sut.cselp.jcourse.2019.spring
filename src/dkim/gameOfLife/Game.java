@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Game {
 
-//    private final int FIELD_WIDTH = 60; // ширина игрового поля
+    //    private final int FIELD_WIDTH = 60; // ширина игрового поля
 //    private final int FIELD_HEIGHT = 35; // высота игрового поля
     private final int FRAME_DELAY = 200; // задержка отрисовки
     private Set<Cell> currentGen = new HashSet<>();
@@ -21,14 +21,14 @@ public class Game {
 
         //настраиваем Canvas
         StdDraw.setCanvasSize(1300, 700);
-        StdDraw.setXscale(-20, 1199);
-        StdDraw.setYscale(-20, 699);
+        StdDraw.setXscale(0, 1299);
+        StdDraw.setYscale(0, 699);
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.enableDoubleBuffering(); //буферизация с offscreen для анимации
 
         //генерируем игровое поле
         generate();
-        show();
+//        show();
 
 //        int i = 1; //номер поколения
 //        while (true) {
@@ -68,16 +68,16 @@ public class Game {
         };
 
         Cell[] block = {
-                new Cell(10,10),
-                new Cell(10,11),
-                new Cell(11,11),
-                new Cell(11,10),
+                new Cell(10, 10),
+                new Cell(10, 11),
+                new Cell(11, 11),
+                new Cell(11, 10),
         };
 
         Cell[] line = {
+                new Cell(9, 10),
                 new Cell(10, 10),
                 new Cell(11, 10),
-                new Cell(12, 10),
         };
         currentGen.addAll(Arrays.asList(line));
 
@@ -86,48 +86,67 @@ public class Game {
     /**
      * Метод для подсчета количества живых соседей клетки
      *
-     * @param cell - клетка, для которой считаются соседи
+     * @param neighbors - соседи клетки
      * @return количество "живых" соседей
      */
-    int countNeighbors(Cell cell) {
+    int countNeighbors(Set<Cell> neighbors) {
         int count = 0;
 
-        dead:
-        //обходим поле 3*3 (все соседи)
-        for (int i = -1; i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
-
-                if ((i == 0) && (j == 0)) {
-                    continue;
-                }
-
-                int newX = cell.x + i;
-                int newY = cell.y + j;
-                Cell neighbor = new Cell(newX, newY);
-
-                count += currentGen.contains(neighbor) ? 1 : 0;
-
-                if (count > 3) {
-                    break dead;
-                }
+        for (Cell cell : neighbors) {
+            count += currentGen.contains(cell) ? 1 : 0;
+            if (count > 3) {
+                return count;
             }
         }
 
         return count;
     }
 
+    Set<Cell> getNeighbors(Cell cell) {
+        Set<Cell> neighbors = new HashSet<>();
+
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                if ((i == 0) && (j == 0)) {
+                    continue;
+                }
+
+                int nX = cell.x + i;
+                int nY = cell.y + j;
+                neighbors.add(new Cell(nX, nY));
+            }
+        }
+        return neighbors;
+    }
 
     /**
      * Смена поколения по правилам Conway's dkim.gameOfLife.Game of Life
      */
     void life() {
-        Set<Cell> potentialCells = new HashSet<>();
+        Set<Cell> potentials = new HashSet<>();
+
         for (Cell cell : currentGen) {
-            int aliveNeighbors = countNeighbors(cell);
+            Set<Cell> neighbors = getNeighbors(cell);
+            int aliveNeighbors = countNeighbors(neighbors);
+
             if ((aliveNeighbors <= 3) && (aliveNeighbors >= 2)) {
                 nextGen.add(cell);
             }
+
+            for (Cell neighbor : neighbors) {
+                if (!currentGen.contains(neighbor)) {
+                    potentials.add(neighbor);
+                }
+            }
+
+            for (Cell potential : potentials) {
+                aliveNeighbors = countNeighbors(getNeighbors(potential));
+                if (aliveNeighbors == 3) {
+                    nextGen.add(potential);
+                }
+            }
         }
+
 
     }
 
