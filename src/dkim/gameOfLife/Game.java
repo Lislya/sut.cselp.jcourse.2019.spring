@@ -50,8 +50,6 @@ public class Game {
 
     /**
      * Генерация игрового поля
-     * Для того, чтобы сгенерировать Глайдер, раскомментировать блок "Glider"
-     * Для того, чтобы сгенерировать Small Exploder, раскомменировать блок "Small Exploder"
      */
     void generate() {
         /* Генерируем small exploder */
@@ -108,6 +106,11 @@ public class Game {
         return count;
     }
 
+    /**
+     * Метод для получения соседей клетки
+     * @param cell - текущая клетка
+     * @return множество соседей
+     */
     Set<Cell> getNeighbors(Cell cell) {
         Set<Cell> neighbors = new HashSet<>();
 
@@ -126,7 +129,7 @@ public class Game {
     }
 
     /**
-     * Смена поколения по правилам Conway's dkim.gameOfLife.Game of Life
+     * Смена поколения по правилам Conway's Game of Life
      */
     void life() {
         Set<Cell> potentials = new HashSet<>();
